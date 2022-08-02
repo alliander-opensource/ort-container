@@ -15,7 +15,6 @@ This discussion occurs in the [Publish the Docker images to a public repository]
 Containers are provided as GitHub Packages.
 Images have a number of tags to help select the correct image and relate it to the upstream code:
 
-- **digest-sha256-xxxxxxxxx** Digest of the resulting container
 - **builder-sha-xxxxxxxx** SHA reference of this repository reponsible for building the container 
 - **ort-sha-xxxxxxxx** SHA reference of the [ORT repository](https://github.com/oss-review-toolkit/ort) containing the Dockerfile
 - **date-YYYYMMDD** Date the container was built
