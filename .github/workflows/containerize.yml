@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: Copyright Contributors to the ORT Container project
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Containerize
+on:
+  schedule:
+    - cron: '22 11 * * *'  # Trigger daily at 11:22 UTC'
+  workflow_dispatch: # allow manual triggering
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  containerize:
+    name: containerize
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout latest ORT repo
+        uses: actions/checkout@v3
+        with:
+          repository: oss-review-toolkit/ort
+
+      - name: Inspect result
+        run: ls -la
+
+      - name: Store repo SHA in variable
+        run: echo "ORT_SHA=$(/usr/bin/git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Lowercase image name based on repo
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Shorten repo SHA
+        run: echo "REPO_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Store date in variable
+        run: echo "DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=builder-sha-${{ env.REPO_SHA }}
+            type=raw,value=date-${{ env.DATE }}
+            type=raw,value=ort-sha-${{ env.ORT_SHA }}
+            type=raw,value=latest
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and tag Docker image
+        id: build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Reformat digest for use in names
+        # Note: image ID is written to digest https://github.com/docker/build-push-action/issues/579
+        run: |
+          echo "IMAGE_ID_FULL=${{ steps.build.outputs.digest }}" >> $GITHUB_ENV
+          echo "IMAGE_ID=`echo ${{ steps.build.outputs.digest }} | sed s/sha256://`" >> $GITHUB_ENV
+          echo "SHORT_IMAGE_ID=`echo ${{ steps.build.outputs.digest }} | sed s/sha256:// | cut -c1-12`" >> $GITHUB_ENV
+
+      - name: Install Tern
+        run: |
+          sudo apt install git attr python3 python3-pip jq skopeo
+          sudo pip install pipx
+          pipx install tern
+
+      - name: List image digests
+        run: docker images --digests
+
+      - name: Save container as a tar archive for local scanning
+        run: docker save -o ${{ github.event.repository.name }}.tar ${{ env.IMAGE_ID }}
+
+      - name: Run Tern
+        run: tern report -o tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt -w ${{ github.event.repository.name }}.tar
+
+      - name: Store results
+        uses: actions/upload-artifact@v3
+        with:
+          name: tern-output-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
+          path: ${{ github.workspace }}/tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt
+
+      - name: Push Docker image
+        # Only push on main branch
+        if: github.ref == 'refs/heads/main'
+        run: docker image push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
