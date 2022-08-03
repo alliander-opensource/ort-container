@@ -74,7 +74,6 @@ jobs:
           echo "SHORT_IMAGE_ID=`echo ${{ steps.build.outputs.digest }} | sed s/sha256:// | cut -c1-12`" >> $GITHUB_ENV
 
       - name: Install Tern
-        if: false
         run: |
           sudo apt install git attr python3 python3-pip jq skopeo
           sudo pip install pipx
@@ -84,11 +83,9 @@ jobs:
         run: docker images --digests
 
       - name: Save container as a tar archive for local scanning
-        if: false
         run: docker save -o ${{ github.event.repository.name }}.tar ${{ env.IMAGE_ID }}
 
       - name: Run Tern
-        if: false
         run: tern report -o tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt -w ${{ github.event.repository.name }}.tar
 
       - name: Build a Docker container wrapping the Tern output
@@ -101,7 +98,6 @@ jobs:
         run: docker images --digests
 
       - name: Store results
-        if: false
         uses: actions/upload-artifact@v3
         with:
           name: tern-output-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
