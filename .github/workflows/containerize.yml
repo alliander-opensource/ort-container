@@ -63,8 +63,6 @@ jobs:
           context: .
           load: true
           push: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Reformat digest for use in names
         # Note: image ID is written to digest https://github.com/docker/build-push-action/issues/579
@@ -88,7 +86,7 @@ jobs:
       - name: Run Tern
         run: tern report -o tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt -w ${{ github.event.repository.name }}.tar
 
-      - name: Build a Docker container wrapping the Tern output
+      - name: Create a Dockerfile to wrap the Tern output
         run: |
           echo -e "FROM ${{ env.IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
           cat Dockerfile-wrapper
@@ -102,6 +100,16 @@ jobs:
         with:
           name: tern-output-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
           path: ${{ github.workspace }}/tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt
+
+      - name: Build final image
+        id: build
+        with:
+          context: .
+          file: 'Dockerfile-wrapper'
+          load: true
+          push: false
+          tags: ${{ steps.meta.output.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Push Docker image
         # Only push on main branch
