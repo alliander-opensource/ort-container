@@ -87,6 +87,14 @@ jobs:
       - name: Run Tern
         run: tern report -o tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt -w ${{ github.event.repository.name }}.tar
 
+      - name: Build a Docker container wrapping the Tern output
+        run: |
+          echo -e "FROM {{ env.IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wrapped -f Dockerfile-wrapper .
+
+      - name: List image digests
+        run: docker images --digests
+
       - name: Store results
         uses: actions/upload-artifact@v3
         with:
@@ -95,5 +103,6 @@ jobs:
 
       - name: Push Docker image
         # Only push on main branch
+        # TODO: push the wrapped container instead of the original one
         if: github.ref == 'refs/heads/main'
         run: docker image push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
