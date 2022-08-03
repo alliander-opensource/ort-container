@@ -94,7 +94,7 @@ jobs:
 
       - name: Build a Docker container wrapping the Tern output
         run: |
-          echo -e "FROM {{ env.IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
+          echo -e "FROM ${{ env.IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
           cat Dockerfile-wrapper
           docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wrapped -f Dockerfile-wrapper .
 
