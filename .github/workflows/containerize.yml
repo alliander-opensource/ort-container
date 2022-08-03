@@ -102,7 +102,6 @@ jobs:
           path: ${{ github.workspace }}/tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt
 
       - name: Build final image
-        id: build
         uses: docker/build-push-action@v3
         with:
           context: .
