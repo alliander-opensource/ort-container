@@ -58,7 +58,6 @@ jobs:
 
       - name: Build and tag Docker image
         id: build
-        if: false
         uses: docker/build-push-action@v3
         with:
           context: .
