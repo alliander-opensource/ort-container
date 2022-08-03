@@ -103,6 +103,7 @@ jobs:
 
       - name: Build final image
         id: build
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: 'Dockerfile-wrapper'
