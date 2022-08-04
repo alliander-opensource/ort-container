@@ -38,17 +38,6 @@ jobs:
       - name: Store date in variable
         run: echo "DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=builder-sha-${{ env.REPO_SHA }}
-            type=raw,value=date-${{ env.DATE }}
-            type=raw,value=ort-sha-${{ env.ORT_SHA }}
-            type=raw,value=latest
-
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -86,11 +75,16 @@ jobs:
       - name: Run Tern
         run: tern report -o tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt -w ${{ github.event.repository.name }}.tar
 
-      - name: Create a Dockerfile to wrap the Tern output
+      - name: Build container that wraps the Tern output
         run: |
           echo -e "FROM ${{ env.SHORT_IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
           cat Dockerfile-wrapper
-          #docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:wrapped -f Dockerfile-wrapper .
+          docker build \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:builder-sha-${{ env.REPO_SHA }} \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:date-${{ env.DATE }} \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ort-sha-${{ env.ORT_SHA }} \
+          -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+          -f Dockerfile-wrapper .
 
       - name: List image digests
         run: docker images --digests
@@ -100,16 +94,6 @@ jobs:
         with:
           name: tern-output-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
           path: ${{ github.workspace }}/tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt
-
-      - name: Build final image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: 'Dockerfile-wrapper'
-          load: true
-          push: false
-          tags: ${{ steps.meta.output.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Push Docker image
         # Only push on main branch
