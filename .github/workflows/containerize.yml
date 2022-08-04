@@ -30,7 +30,8 @@ jobs:
         run: echo "ORT_SHA=$(/usr/bin/git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Lowercase image name based on repo
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+        # TODO: integrate image names before merging
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}-tmp" >> ${GITHUB_ENV}
 
       - name: Shorten repo SHA
         run: echo "REPO_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
@@ -102,5 +103,5 @@ jobs:
       - name: Push Docker image
         # Only push on main branch
         # TODO: push the wrapped container instead of the original one
-        if: github.ref == 'refs/heads/main'
+        #if: github.ref == 'refs/heads/main'
         run: docker image push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
