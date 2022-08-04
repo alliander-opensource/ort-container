@@ -80,10 +80,10 @@ jobs:
           echo -e "FROM ${{ env.SHORT_IMAGE_ID }}\nCOPY tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt ./" > Dockerfile-wrapper
           cat Dockerfile-wrapper
           docker build \
-          --label org.opencontainers.image.title=ort-containers.image.title=ort-container \
+          --label org.opencontainers.image.title=ort-containers.image.title=${{ github.event.repository.name }} \
           --label ort.opencontainers.image.description="A temporary solution to provide a ORT Container." \
-          --label org.opencontainers.image.url="https://github.com/alliander-opensource/ort-container" \
-          --label org.opencontainers.image.source="https://github.com/alliander-opensource/ort-container" \
+          --label org.opencontainers.image.url="${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}" \
+          --label org.opencontainers.image.source="${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}" \
           -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:builder-sha-${{ env.REPO_SHA }} \
           -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:date-${{ env.DATE }} \
           -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:ort-sha-${{ env.ORT_SHA }} \
