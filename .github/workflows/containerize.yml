@@ -101,6 +101,5 @@ jobs:
 
       - name: Push Docker image
         # Only push on main branch
-        # TODO: push the wrapped container instead of the original one
         if: github.ref == 'refs/heads/main'
         run: docker image push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
