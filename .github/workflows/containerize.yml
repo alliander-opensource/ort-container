@@ -15,6 +15,7 @@ env:
 jobs:
   containerize:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - ref: main
