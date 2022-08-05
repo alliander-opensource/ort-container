@@ -113,7 +113,7 @@ jobs:
       - name: Store results
         uses: actions/upload-artifact@v3
         with:
-          name: tern-output-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
+          name: tern-output${{ matrix.suffix}}-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}
           path: ${{ github.workspace }}/tern-analysis-${{ env.DATE }}-${{ env.SHORT_IMAGE_ID }}.txt
 
       - name: Push Docker image
