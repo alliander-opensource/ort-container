@@ -26,10 +26,6 @@ jobs:
             suffix: '-pr-4746'
             description: 'Update Dockerfile to use multi-stage builds by heliocastro'
             image_url: 'https://github.com/oss-review-toolkit/ort/pull/4746'
-          - ref: 'refs/pull/4926/merge'
-            suffix: '-pr-4926'
-            description: 'Feature/multi stage dockerfile by porscheofficial'
-            image_url: 'https://github.com/oss-review-toolkit/ort/pull/4926'
     name: containerize
     runs-on: ubuntu-latest
     steps:
