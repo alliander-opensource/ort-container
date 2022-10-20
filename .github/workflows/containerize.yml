@@ -22,10 +22,6 @@ jobs:
             suffix: ''
             description: 'Main branch'
             image_url: 'https://github.com/oss-review-toolkit/ort'
-          - ref: 'refs/pull/5760/merge'
-            suffix: '-pr-5760'
-            description: 'Docker: Component based Multi stage docker by heliocastro'
-            image_url: 'https://github.com/oss-review-toolkit/ort/pull/5760'
     name: containerize
     runs-on: ubuntu-latest
     steps:
