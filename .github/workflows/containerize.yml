@@ -18,10 +18,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
+            # NOTE: for a PR use 'refs/pull/<pr-nr>/merge' as ref
           - ref: main
             suffix: ''
             description: 'Main branch'
             image_url: 'https://github.com/oss-review-toolkit/ort'
+          - ref: 'refs/pull/6053/merge'
+            suffix: '-pr-6053'
+            description: 'docker: Build and run as a non-privileged user'
+            image_url: 'https://github.com/oss-review-toolkit/ort/pull/6053'
     name: containerize
     runs-on: ubuntu-latest
     steps:
