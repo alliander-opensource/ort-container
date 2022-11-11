@@ -23,7 +23,7 @@ jobs:
             suffix: ''
             description: 'Main branch'
             image_url: 'https://github.com/oss-review-toolkit/ort'
-          - ref: refs/pull/6053/merge'
+          - ref: 'refs/pull/6053/merge'
             suffix: '-pr-6053'
             description: 'docker: Build and run as a non-privileged user'
             image_url: 'https://github.com/oss-review-toolkit/ort/pull/6053'
