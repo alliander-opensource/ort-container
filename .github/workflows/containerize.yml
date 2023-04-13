@@ -23,6 +23,10 @@ jobs:
             suffix: ''
             description: 'Main branch'
             image_url: 'https://github.com/oss-review-toolkit/ort'
+          - ref: 'refs/pull/6209/merge'
+            suffix: '-pr-6209'
+            description: 'Dotnet: Add support for nuget-inspector'
+            image_url: 'https://github.com/oss-review-toolkit/ort/pull/6209'
 
     name: containerize
     runs-on: ubuntu-latest
